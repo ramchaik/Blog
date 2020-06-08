@@ -37,16 +37,8 @@ app.post("/posts", async (req, res) => {
 
 app.post("/events", (req, res) => {
   const { type } = req.body;
-  console.log("req.body", req.body);
   console.log("Event - ", type);
-
-  switch (type) {
-    case "PostCreated":
-      break;
-
-    case "CommentCreated":
-      break;
-  }
+  res.send({});
 });
 
 app.listen(4000, () => {
