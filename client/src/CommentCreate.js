@@ -20,7 +20,7 @@ export default ({ postId }) => {
         <div className='form-group'>
           <label>New Comment</label>
           <input
-            classname='form-control'
+            className='form-control'
             type='text'
             value={content}
             onChange={(e) => setContent(e.target.value)}

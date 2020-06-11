@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyPartser = require("body-parser");
 const cors = require("cors");
+const axios = require("axios");
 
 const app = express();
 app.use(bodyPartser.json());
@@ -8,23 +9,14 @@ app.use(cors());
 
 const posts = {};
 
-app.get("/posts", (req, res) => {
-  res.send(posts);
-});
-
-app.post("/events", (req, res) => {
-  const { type, data } = req.body;
-  console.log("EVENT EMITTED:  type", type)
-
+const hanldeEvents = (type, data) => {
   if (type === "PostCreated") {
-    console.log(" INSIDE type in Query", type)
     const { id, title } = data;
 
     posts[id] = { id, title, comments: [] };
   }
 
   if (type === "CommentCreated") {
-    console.log(" INSIDE type in Query", type)
     const { id, postId, content, status } = data;
 
     const post = posts[postId];
@@ -36,7 +28,6 @@ app.post("/events", (req, res) => {
   }
 
   if (type === "CommentUpdated") {
-    console.log(" INSIDE type in Query", type)
     const { id, postId, content, status } = data;
     const post = posts[postId];
     const comment = post.comments.find((comment) => comment.id === id);
@@ -44,12 +35,28 @@ app.post("/events", (req, res) => {
     comment.status = status;
     comment.content = content;
   }
+};
 
-  console.log(posts);
+app.get("/posts", (req, res) => {
+  res.send(posts);
+});
+
+app.post("/events", (req, res) => {
+  const { type, data } = req.body;
+
+  hanldeEvents(type, data);
 
   res.send({});
 });
 
-app.listen(4002, () => {
+app.listen(4002, async () => {
   console.log("Listening on 4002...");
+
+  const res = await axios.get("http://localhost:4005/events");
+
+  for (let event of res.data) {
+    console.log("Processing event:", event.type);
+
+    hanldeEvents(event.type, event.data);
+  }
 });
